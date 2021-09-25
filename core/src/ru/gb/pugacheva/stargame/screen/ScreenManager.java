@@ -1,4 +1,4 @@
-package ru.gb.pugacheva.stargame;
+package ru.gb.pugacheva.stargame.screen;
 
 import com.badlogic.gdx.Gdx;
 

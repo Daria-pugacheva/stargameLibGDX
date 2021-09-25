@@ -1,9 +1,10 @@
-package ru.gb.pugacheva.stargame;
+package ru.gb.pugacheva.stargame.game;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import ru.gb.pugacheva.stargame.screen.ScreenManager;
 
 public class Asteroid {
 
@@ -13,7 +14,7 @@ public class Asteroid {
 
     public Asteroid() {
         this.texture = new Texture("asteroid.png");
-        this.position = new Vector2(-128,ScreenManager.SCREEN_HEIGHT/2f); //особо не влияет стартовая позиция, при обновлениях меняется.
+        this.position = new Vector2(-128, ScreenManager.SCREEN_HEIGHT/2f); //особо не влияет стартовая позиция, при обновлениях меняется.
         this.angel = 0.0f;
     }
 

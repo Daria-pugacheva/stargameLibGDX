@@ -13,13 +13,13 @@ public class WorldRenderer {
         this.batch = batch;
     }
 
-    public void render () {
+    public void render() {
         ScreenUtils.clear(0, 0.2f, 0.5f, 1);
         batch.begin();
         gc.getBackground().render(batch);
         gc.getHero().render(batch);
         gc.getBulletController().render(batch);
-        //asteroid.render(batch); // запросить у gc
+        gc.getAsteroidController().render(batch);
         batch.end();
     }
 }

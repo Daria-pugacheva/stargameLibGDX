@@ -3,8 +3,9 @@ package ru.gb.pugacheva.stargame.screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import ru.gb.pugacheva.stargame.game.GameController;
 import ru.gb.pugacheva.stargame.game.WorldRenderer;
+import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
-public class GameScreen extends AbstractScreen{
+public class GameScreen extends AbstractScreen {
     private SpriteBatch batch;
     private GameController gameController;
     private WorldRenderer worldRenderer;
@@ -15,6 +16,7 @@ public class GameScreen extends AbstractScreen{
 
     @Override
     public void show() {
+        Assets.getInstance().loadAssets(ScreenManager.ScreenType.GAME);
         this.gameController = new GameController();
         this.worldRenderer = new WorldRenderer(gameController, batch);
     }

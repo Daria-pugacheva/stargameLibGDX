@@ -24,6 +24,15 @@ public class Asteroid implements Poolable {
 
     private final float BASE_SIZE = 256.0f;
     private final float BASE_RADIUS = BASE_SIZE / 2;
+    private final float MAX_CHAIN_OF_ASTEROIDS = 5.0f; //используется для расчетов при дроблении астероидов и ущерба корабля
+
+    public float getBASE_RADIUS() {
+        return BASE_RADIUS;
+    }
+
+    public float getMAX_CHAIN_OF_ASTEROIDS() {
+        return MAX_CHAIN_OF_ASTEROIDS;
+    }
 
     public int getHpMax() {
         return hpMax;
@@ -71,7 +80,7 @@ public class Asteroid implements Poolable {
         this.hitArea.setPosition(position);
         this.scale = scale;
         this.active = true;
-        this.hitArea.setRadius(BASE_RADIUS * scale * 0.9f); // заменить, чтобы изменялся от размера астероида
+        this.hitArea.setRadius(BASE_RADIUS * scale * 0.9f);
     }
 
     public boolean takeDamage(int amount) {
@@ -80,11 +89,11 @@ public class Asteroid implements Poolable {
             deactivate();
             if (scale > 0.3f) {
                 gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-200, 200),
-                        MathUtils.random(-200, 200), scale - 0.2f);
+                        MathUtils.random(-200, 200), scale - 1/(MAX_CHAIN_OF_ASTEROIDS));
                 gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-200, 200),
-                        MathUtils.random(-200, 200), scale - 0.2f);
+                        MathUtils.random(-200, 200), scale - 1/(MAX_CHAIN_OF_ASTEROIDS));
                 gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-200, 200),
-                        MathUtils.random(-200, 200), scale - 0.2f);
+                        MathUtils.random(-200, 200), scale - 1/(MAX_CHAIN_OF_ASTEROIDS));
             }
             return true;
         } else {

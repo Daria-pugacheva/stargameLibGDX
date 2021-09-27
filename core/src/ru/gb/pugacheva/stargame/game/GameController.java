@@ -43,10 +43,11 @@ public class GameController {
         hero.update(dt);
         asteroidController.update(dt);
         bulletController.update(dt);
-        checkCollisions();
+        checkBulletCollisions(); // решила не объединять все проверки в один метод. Вроде, читабельнее, когда два отдельных
+        checkHeroCollisions();
     }
 
-    public void checkCollisions() {
+    public void checkBulletCollisions() {
         for (int i = 0; i < bulletController.getActiveList().size(); i++) {
             Bullet b = bulletController.getActiveList().get(i);
             for (int j = 0; j < asteroidController.getActiveList().size(); j++) {
@@ -58,6 +59,17 @@ public class GameController {
                     }
                     break;
                 }
+            }
+        }
+    }
+
+    public void checkHeroCollisions() {
+            for (int i = 0; i < asteroidController.getActiveList().size(); i++) {
+                Asteroid a = asteroidController.getActiveList().get(i);
+                if (a.getHitArea().overlaps(hero.getHitArea())) {
+                    int damageSize = Math.round(a.getHitArea().radius/(a.getBASE_RADIUS()/a.getMAX_CHAIN_OF_ASTEROIDS()));
+                    hero.takeDamage(damageSize); // Максимум - это кол-во астероидов в цепочке дробления, минимум 1, шаг - 1 (каждый следующий меньший по величине астеройд наносит ущерб меньше на 1)
+                    a.deactivate();
             }
         }
     }

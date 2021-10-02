@@ -9,15 +9,17 @@ import ru.gb.pugacheva.stargame.screen.utils.Assets;
 public class BulletController extends ObjectPool <Bullet> {
     //private Texture bulletTexture;
     private TextureRegion bulletTexture;
+    private GameController gc;
 
     @Override
     protected Bullet newObject() {
-        return new Bullet();
+        return new Bullet(gc);
     }
 
-    public BulletController() {
+    public BulletController(GameController gc) {
         //this.bulletTexture = new Texture("bullet.png");
         this.bulletTexture = Assets.getInstance().getAtlas().findRegion("bullet");
+        this.gc = gc;
     }
 
     public void render(SpriteBatch batch) {

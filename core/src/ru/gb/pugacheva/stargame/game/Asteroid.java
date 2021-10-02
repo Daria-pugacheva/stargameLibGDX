@@ -41,6 +41,10 @@ public class Asteroid implements Poolable {
         return velocity;
     }
 
+    public float getBASE_RADIUS() {
+        return BASE_RADIUS;
+    }
+
     @Override
     public boolean isActive() {
         return active;

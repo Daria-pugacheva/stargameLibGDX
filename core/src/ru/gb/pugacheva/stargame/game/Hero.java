@@ -53,6 +53,7 @@ public class Hero {
         return position;
     }
 
+
     public Hero(GameController gc) {
         this.gc = gc;
         this.texture = Assets.getInstance().getAtlas().findRegion("ship");
@@ -175,19 +176,9 @@ public class Hero {
             currentWeapon.fire();
         }
     }
-//            float wx;
-//            float wy;
-//
-//            wx = position.x + MathUtils.cosDeg(angel + 90) * 20;
-//            wy = position.y + MathUtils.sinDeg(angel + 90) * 20;
-//            gc.getBulletController().setup(wx, wy,
-//                    MathUtils.cosDeg(angel) * 500 + velocity.x, MathUtils.sinDeg(angel) * 500 + velocity.y);
-//
-//            wx = position.x + MathUtils.cosDeg(angel - 90) * 20;
-//            wy = position.y + MathUtils.sinDeg(angel - 90) * 20;
-//            gc.getBulletController().setup(wx, wy,
-//                    MathUtils.cosDeg(angel) * 500 + velocity.x, MathUtils.sinDeg(angel) * 500 + velocity.y);
-//        }
-//    }
+
+    public void improveHp (int amount){
+        hp +=amount;
+    }
 
 }

@@ -12,7 +12,7 @@ public class Weapon {
     private float bulletSpeed;
     private int maxBulletQuantity;
     private int currentBulletQuantity;
-    private Vector3 [] slots; //в параметрах х - это расстояние от центра,
+    private Vector3[] slots; //в параметрах х - это расстояние от центра,
     // У - это угол-направление, в котором отсчитываем направление,
     //Z - это напраление стрельбы из точки (указывается угол)
 
@@ -42,22 +42,29 @@ public class Weapon {
         this.slots = slots;
     }
 
-    public void fire(){
-        if(currentBulletQuantity >0){
+    public void fire() {
+        if (currentBulletQuantity > 0) {
             currentBulletQuantity--;
 
             for (int i = 0; i < slots.length; i++) {
                 float x, y, vx, vy;
 
-                x = hero.getPosition().x + MathUtils.cosDeg(hero.getAngel() + slots[i].y)* slots[i].x;
-                y = hero.getPosition().y + MathUtils.sinDeg(hero.getAngel() + slots[i].y)* slots[i].x;
+                x = hero.getPosition().x + MathUtils.cosDeg(hero.getAngel() + slots[i].y) * slots[i].x;
+                y = hero.getPosition().y + MathUtils.sinDeg(hero.getAngel() + slots[i].y) * slots[i].x;
 
                 vx = hero.getVelocity().x + bulletSpeed * MathUtils.cosDeg(hero.getAngel() + slots[i].z);
                 vy = hero.getVelocity().x + bulletSpeed * MathUtils.sinDeg(hero.getAngel() + slots[i].z);
 
-                gc.getBulletController().setup(x,y,vx,vy);
+                gc.getBulletController().setup(x, y, vx, vy);
 
             }
+        }
+    }
+
+    public void addAmmos(int amount) {
+        currentBulletQuantity += amount;
+        if (currentBulletQuantity > maxBulletQuantity) {
+            currentBulletQuantity = maxBulletQuantity;
         }
     }
 }

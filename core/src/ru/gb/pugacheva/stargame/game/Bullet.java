@@ -45,14 +45,14 @@ public class Bullet implements Poolable {
         position.mulAdd(velocity, dt);
         float bx = position.x;
         float by = position.y;
-            gc.getParticleController().setup(
-                    bx + MathUtils.random(-4,4), by+ MathUtils.random(-4,4),
-                    velocity.x *-0.3f + MathUtils.random(-20,20), velocity.y*-0.3f + MathUtils.random(-20,20),
-                    0.05f,
-                    1.5f, 0.2f,
-                    1.0f,0.3f,0.0f,1.0f,
-                    1.0f, 1.0f, 1.0f, 1.0f
-            );
+        gc.getParticleController().setup(
+                bx + MathUtils.random(-4, 4), by + MathUtils.random(-4, 4),
+                velocity.x * -0.3f + MathUtils.random(-20, 20), velocity.y * -0.3f + MathUtils.random(-20, 20),
+                0.05f,
+                1.5f, 0.2f,
+                1.0f, 0.3f, 0.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 1.0f
+        );
 
         if (position.x < -20 || position.x > ScreenManager.SCREEN_WIDTH + 20 ||
                 position.y < -20 || position.y > ScreenManager.SCREEN_HEIGHT + 20) {

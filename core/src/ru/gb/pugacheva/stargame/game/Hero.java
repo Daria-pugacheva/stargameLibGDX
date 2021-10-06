@@ -25,6 +25,7 @@ public class Hero {
     private int score;
     private int scoreView;
     private int hp;
+    private int money;
     private StringBuilder stringBuilder;
     private Circle hitarea;
     private Weapon currentWeapon;
@@ -64,7 +65,7 @@ public class Hero {
         this.stringBuilder = new StringBuilder();
         this.hitarea = new Circle(position, 26); // радиус чуть меньше, чем у героя, чтобы урон был только про попадании по видимой части корабля, а не по пустым пикселям
         this.currentWeapon = new Weapon(
-                gc, this, "Laser", 0.2f, 1, 600, 100,
+                gc, this, "Laser", 0.2f, 1, 600, 300,
                 new Vector3[]{
                         new Vector3(28, 0, 0),
                         new Vector3(28, 90, 20),
@@ -84,13 +85,28 @@ public class Hero {
         stringBuilder.clear();
         stringBuilder.append("SCORE: ").append(scoreView).append("\n");
         stringBuilder.append("HP: ").append(hp).append("\n");
+        stringBuilder.append("MONEY: ").append(money).append("\n");
         stringBuilder.append("BULLETS: ").append(currentWeapon.getCurrentBulletQuantity()).append("/")
-        .append(currentWeapon.getMaxBulletQuantity()).append("\n");
+                .append(currentWeapon.getMaxBulletQuantity()).append("\n");
         font.draw(batch, stringBuilder, 20, ScreenManager.SCREEN_HEIGHT - 20);
     }
 
     public void takeDamage(int amount) {
         hp -= amount;
+    }
+
+    public void consume(PowerUp p) {
+        switch (p.getType()) {
+            case MEDKIT:
+                hp += p.getPower();
+                break;
+            case MONEY:
+                money += p.getPower();
+                break;
+            case AMMOS:
+                currentWeapon.addAmmos(p.getPower());
+                break;
+        }
     }
 
     public void update(float dt) {
@@ -175,19 +191,6 @@ public class Hero {
             currentWeapon.fire();
         }
     }
-//            float wx;
-//            float wy;
-//
-//            wx = position.x + MathUtils.cosDeg(angel + 90) * 20;
-//            wy = position.y + MathUtils.sinDeg(angel + 90) * 20;
-//            gc.getBulletController().setup(wx, wy,
-//                    MathUtils.cosDeg(angel) * 500 + velocity.x, MathUtils.sinDeg(angel) * 500 + velocity.y);
-//
-//            wx = position.x + MathUtils.cosDeg(angel - 90) * 20;
-//            wy = position.y + MathUtils.sinDeg(angel - 90) * 20;
-//            gc.getBulletController().setup(wx, wy,
-//                    MathUtils.cosDeg(angel) * 500 + velocity.x, MathUtils.sinDeg(angel) * 500 + velocity.y);
-//        }
-//    }
+
 
 }

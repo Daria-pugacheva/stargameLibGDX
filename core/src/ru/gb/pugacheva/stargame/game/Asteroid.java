@@ -41,6 +41,10 @@ public class Asteroid implements Poolable {
         return velocity;
     }
 
+    public float getScale() {
+        return scale;
+    }
+
     @Override
     public boolean isActive() {
         return active;

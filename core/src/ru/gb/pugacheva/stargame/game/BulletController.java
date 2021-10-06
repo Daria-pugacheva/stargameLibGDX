@@ -1,13 +1,11 @@
 package ru.gb.pugacheva.stargame.game;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import ru.gb.pugacheva.stargame.game.helpers.ObjectPool;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
-public class BulletController extends ObjectPool <Bullet> {
-    //private Texture bulletTexture;
+public class BulletController extends ObjectPool<Bullet> {
     private TextureRegion bulletTexture;
     private GameController gc;
 
@@ -17,7 +15,6 @@ public class BulletController extends ObjectPool <Bullet> {
     }
 
     public BulletController(GameController gc) {
-        //this.bulletTexture = new Texture("bullet.png");
         this.bulletTexture = Assets.getInstance().getAtlas().findRegion("bullet");
         this.gc = gc;
     }
@@ -29,7 +26,7 @@ public class BulletController extends ObjectPool <Bullet> {
         }
     }
 
-    public void setup(float x, float y, float vx, float vy){
+    public void setup(float x, float y, float vx, float vy) {
         getActiveElement().activate(x, y, vx, vy);
     }
 

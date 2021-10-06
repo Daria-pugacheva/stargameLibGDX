@@ -1,11 +1,9 @@
 package ru.gb.pugacheva.stargame.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.StringBuilder;
-import ru.gb.pugacheva.stargame.screen.ScreenManager;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class WorldRenderer {
@@ -28,6 +26,7 @@ public class WorldRenderer {
         gc.getAsteroidController().render(batch);
         gc.getHero().render(batch);
         gc.getBulletController().render(batch);
+        gc.getPowerUpsController().render(batch);
         gc.getParticleController().render(batch);
         gc.getHero().renderGUI(batch, font32);
         batch.end();

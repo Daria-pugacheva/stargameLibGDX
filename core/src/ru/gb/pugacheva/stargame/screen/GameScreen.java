@@ -6,12 +6,11 @@ import ru.gb.pugacheva.stargame.game.WorldRenderer;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class GameScreen extends AbstractScreen {
-    private SpriteBatch batch;
     private GameController gameController;
     private WorldRenderer worldRenderer;
 
     public GameScreen(SpriteBatch batch) {
-        this.batch = batch;
+        super(batch);
     }
 
     @Override

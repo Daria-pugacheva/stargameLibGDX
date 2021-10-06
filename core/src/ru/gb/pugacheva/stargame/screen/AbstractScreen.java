@@ -1,21 +1,19 @@
 package ru.gb.pugacheva.stargame.screen;
 
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public abstract class AbstractScreen implements Screen {
-//    @Override
-//    public void show() { //при появлении окна (появлении фокуса)
-//
-//    }
-//
-//    @Override
-//    public void render(float delta) { // отрисовка
-//
-//    }
+
+    protected SpriteBatch batch;
+
+    public AbstractScreen(SpriteBatch batch) {
+        this.batch = batch;
+    }
 
     @Override
     public void resize(int width, int height) { // срабатывает, если меняется размер окна
-
+        ScreenManager.getInstance().resize(width, height);
     }
 
     @Override

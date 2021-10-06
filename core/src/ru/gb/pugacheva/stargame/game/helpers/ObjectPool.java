@@ -3,7 +3,7 @@ package ru.gb.pugacheva.stargame.game.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ObjectPool <T extends Poolable>{
+public abstract class ObjectPool<T extends Poolable> {
     // Список активных элементов
     protected List<T> activeList;
     // Список свободных элементов

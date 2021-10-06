@@ -1,5 +1,7 @@
 package ru.gb.pugacheva.stargame.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import ru.gb.pugacheva.stargame.screen.ScreenManager;
@@ -12,6 +14,15 @@ public class GameController {
     private PowerUpsController powerUpsController;
     private Hero hero;
     private Vector2 tempVector;
+    private boolean isGameOnPause;
+
+    public void setGameOnPause(boolean gameOnPause) {
+        isGameOnPause = gameOnPause;
+    }
+
+    public boolean isGameOnPause() {
+        return isGameOnPause;
+    }
 
     public ParticleController getParticleController() {
         return particleController;
@@ -38,6 +49,7 @@ public class GameController {
     }
 
     public GameController() {
+        this.isGameOnPause = false;
         this.background = new Background(this);
         this.hero = new Hero(this);
         this.bulletController = new BulletController(this);
@@ -54,13 +66,35 @@ public class GameController {
     }
 
     public void update(float dt) {
-        background.update(dt);
-        hero.update(dt);
-        asteroidController.update(dt);
-        bulletController.update(dt);
-        powerUpsController.update(dt);
-        particleController.update(dt);
-        checkCollisions();
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            changePauseCondition();
+        }
+
+        if(!isGameOnPause) {
+            background.update(dt);
+            hero.update(dt);
+            asteroidController.update(dt);
+            bulletController.update(dt);
+            powerUpsController.update(dt);
+            particleController.update(dt);
+            checkCollisions();
+            checkHeroHp();
+        }
+    }
+
+    public void checkHeroHp(){
+        if(hero.getHp() <= 0){
+            ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER);
+        }
+    }
+
+
+    private void changePauseCondition (){
+        if(!isGameOnPause){
+            isGameOnPause = true;
+        }else {
+            isGameOnPause = false;
+        }
     }
 
     public void checkCollisions() {

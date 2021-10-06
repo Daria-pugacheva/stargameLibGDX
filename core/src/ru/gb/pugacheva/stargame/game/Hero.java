@@ -42,6 +42,10 @@ public class Hero {
         return score;
     }
 
+    public int getMoney() {
+        return money;
+    }
+
     public void addScore(int amount) {
         this.score += amount;
     }
@@ -52,6 +56,10 @@ public class Hero {
 
     public Vector2 getPosition() {
         return position;
+    }
+
+    public int getHp() {
+        return hp;
     }
 
     public Hero(GameController gc) {

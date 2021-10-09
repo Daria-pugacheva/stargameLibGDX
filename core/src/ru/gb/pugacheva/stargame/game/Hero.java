@@ -15,6 +15,16 @@ import ru.gb.pugacheva.stargame.screen.ScreenManager;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class Hero {
+    public enum Skill {
+        HP_MAX(20), HP(20), WEAPON(100);
+
+        int cost;
+
+        Skill(int cost) {
+            this.cost = cost;
+        }
+    }
+
     private GameController gc;
     private TextureRegion texture;
     private Vector2 position;
@@ -25,10 +35,18 @@ public class Hero {
     private int score;
     private int scoreView;
     private int hp;
+    private int hpMax;
     private int money;
     private StringBuilder stringBuilder;
     private Circle hitarea;
     private Weapon currentWeapon;
+    private Shop shop;
+    private Weapon[] weapons;
+    private int weaponNum;
+
+    public Shop getShop() {
+        return shop;
+    }
 
     public Circle getHitarea() {
         return hitarea;
@@ -54,6 +72,22 @@ public class Hero {
         return position;
     }
 
+    public int getMoney() {
+        return money;
+    }
+
+    public boolean isAlive() {
+        return hp > 0;
+    }
+
+    public boolean isMoneyEnough(int amount) {
+        return money >= amount;
+    }
+
+    public void decreaseMoney(int amount) {
+        money -= amount;
+    }
+
     public Hero(GameController gc) {
         this.gc = gc;
         this.texture = Assets.getInstance().getAtlas().findRegion("ship");
@@ -61,17 +95,15 @@ public class Hero {
         this.velocity = new Vector2(0, 0); // вектор скорости изначально нулевой - не двигаемся
         this.angel = 0.0f;
         this.enginePower = 500.0f;
-        this.hp = 100;
+        this.hpMax = 100;
+        this.hp = hpMax;
+        this.money = 1000;
+        this.shop = new Shop(this);
         this.stringBuilder = new StringBuilder();
         this.hitarea = new Circle(position, 26); // радиус чуть меньше, чем у героя, чтобы урон был только про попадании по видимой части корабля, а не по пустым пикселям
-        this.currentWeapon = new Weapon(
-                gc, this, "Laser", 0.2f, 1, 600, 300,
-                new Vector3[]{
-                        new Vector3(28, 0, 0),
-                        new Vector3(28, 90, 20),
-                        new Vector3(28, -90, -20)
-                }
-        );
+        createWeapons();
+        this.weaponNum = 0;
+        this.currentWeapon = weapons [weaponNum];
     }
 
 
@@ -84,7 +116,7 @@ public class Hero {
     public void renderGUI(SpriteBatch batch, BitmapFont font) {
         stringBuilder.clear();
         stringBuilder.append("SCORE: ").append(scoreView).append("\n");
-        stringBuilder.append("HP: ").append(hp).append("\n");
+        stringBuilder.append("HP: ").append(hp).append(" / ").append(hpMax).append("\n");
         stringBuilder.append("MONEY: ").append(money).append("\n");
         stringBuilder.append("BULLETS: ").append(currentWeapon.getCurrentBulletQuantity()).append("/")
                 .append(currentWeapon.getMaxBulletQuantity()).append("\n");
@@ -109,6 +141,24 @@ public class Hero {
         }
     }
 
+    public boolean upgrade(Skill skill) {
+        switch (skill) {
+            case HP_MAX:
+                hpMax += 10;
+                return true;
+            case HP:
+                hp += 10;
+                return true;
+            case WEAPON:
+                if(weaponNum <weapons.length -1){
+                    weaponNum ++;
+                    currentWeapon = weapons[weaponNum];
+                    return true;
+                }
+        }
+        return false;
+    }
+
     public void update(float dt) {
         fireTimer += dt;
         updateScore(dt);
@@ -131,6 +181,9 @@ public class Hero {
         } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             velocity.x += MathUtils.cosDeg(angel - 180) * enginePower / 2 * dt;
             velocity.y += MathUtils.sinDeg(angel - 180) * enginePower / 2 * dt;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+            shop.setVisible(true);
         }
 
         position.mulAdd(velocity, dt); // Добавляя вектор скорости к позиции, получаем движение
@@ -192,5 +245,48 @@ public class Hero {
         }
     }
 
+    private void createWeapons() {
+        weapons = new Weapon[]{
+                new Weapon(
+                        gc, this, "Laser", 0.2f, 1, 600, 300,
+                        new Vector3[]{
+                                new Vector3(28, 90, 0),
+                                new Vector3(28, -90, 0)
+                        }),
+                new Weapon(
+                        gc, this, "Laser", 0.2f, 1, 600, 300,
+                        new Vector3[]{
+                                new Vector3(28, 0, 0),
+                                new Vector3(28, 90, 20),
+                                new Vector3(28, -90, -20)
+                        }),
+                new Weapon(
+                        gc, this, "Laser", 0.2f, 1, 600, 500,
+                        new Vector3[]{
+                                new Vector3(28, 0, 0),
+                                new Vector3(28, 90, 10),
+                                new Vector3(28, 90, 20),
+                                new Vector3(28, -90, -10),
+                                new Vector3(28, -90, -20)
+                        }),
+                new Weapon(
+                        gc, this, "Laser", 0.2f, 1, 600, 300,
+                        new Vector3[]{
+                                new Vector3(28, 0, 0),
+                                new Vector3(28, 90, 20),
+                                new Vector3(28, -90, -20)
+                        }),
+                new Weapon(
+                        gc, this, "Laser", 0.1f, 2, 600, 1000,
+                        new Vector3[]{
+                                new Vector3(28, 0, 0),
+                                new Vector3(28, 90, 20),
+                                new Vector3(28, -90, -20)
+                        })
+        };
+    }
 
 }
+
+
+

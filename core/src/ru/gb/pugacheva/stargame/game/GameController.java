@@ -1,7 +1,10 @@
 package ru.gb.pugacheva.stargame.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import ru.gb.pugacheva.stargame.screen.ScreenManager;
 
 public class GameController {
@@ -12,6 +15,11 @@ public class GameController {
     private PowerUpsController powerUpsController;
     private Hero hero;
     private Vector2 tempVector;
+    private Stage stage;
+
+    public Stage getStage() {
+        return stage;
+    }
 
     public ParticleController getParticleController() {
         return particleController;
@@ -37,13 +45,16 @@ public class GameController {
         return powerUpsController;
     }
 
-    public GameController() {
+    public GameController(SpriteBatch batch) {
         this.background = new Background(this);
         this.hero = new Hero(this);
         this.bulletController = new BulletController(this);
         this.particleController = new ParticleController();
         this.asteroidController = new AsteroidController(this);
         this.powerUpsController = new PowerUpsController(this);
+        this.stage = new Stage(ScreenManager.getInstance().getViewport(),batch);
+        this.stage.addActor(hero.getShop());
+        Gdx.input.setInputProcessor(stage);
         this.tempVector = new Vector2(0.0f, 0.0f);
         for (int i = 0; i < 3; i++) {
             asteroidController.setup(MathUtils.random(0, ScreenManager.SCREEN_WIDTH),
@@ -61,6 +72,10 @@ public class GameController {
         powerUpsController.update(dt);
         particleController.update(dt);
         checkCollisions();
+        if(!hero.isAlive()){
+            ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER, hero);
+        }
+        stage.act(dt);
     }
 
     public void checkCollisions() {
@@ -117,11 +132,14 @@ public class GameController {
             PowerUp p = powerUpsController.getActiveList().get(i);
             if (hero.getHitarea().contains(p.getPosition())) {
                 hero.consume(p);
-                particleController.getEffectBuilder().takePowerUpEffect(p.getPosition().x, p.getPosition().y);
+                particleController.getEffectBuilder().takePowerUpEffect(p.getPosition().x, p.getPosition().y, p.getType());
 
                 p.deactivate();
             }
         }
     }
 
+    public void dispose(){
+        background.dispose();
+    }
 }

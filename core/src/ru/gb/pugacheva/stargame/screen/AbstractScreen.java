@@ -31,8 +31,8 @@ public abstract class AbstractScreen implements Screen {
 
     }
 
-    @Override
-    public void dispose() { // вызывается, когда экран уничтожается (выход из приложения)
-
-    }
+//    @Override
+//    public void dispose() { // вызывается, когда экран уничтожается (выход из приложения)
+//
+//    }
 }

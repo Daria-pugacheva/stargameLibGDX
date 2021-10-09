@@ -9,10 +9,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.ScreenUtils;
+import ru.gb.pugacheva.stargame.game.Background;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 
 public class MenuScreen extends AbstractScreen {
+    private Background background;
     private BitmapFont font72;
     private BitmapFont font24;
     private Stage stage;
@@ -23,6 +25,7 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void show() {
+        this.background = new Background(null);
         this.stage = new Stage(ScreenManager.getInstance().getViewport(), batch);
         this.font72 = Assets.getInstance().getAssetManager().get("fonts/font72.ttf");
         this.font24 = Assets.getInstance().getAssetManager().get("fonts/font24.ttf");
@@ -62,6 +65,7 @@ public class MenuScreen extends AbstractScreen {
     }
 
     public void update(float dt) {
+        background.update(dt);
         stage.act(dt);
     }
 
@@ -70,6 +74,7 @@ public class MenuScreen extends AbstractScreen {
         update(delta);
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1);
         batch.begin();
+        background.render(batch);
         font72.draw(batch, "Star Game 2021", 0, 300, ScreenManager.SCREEN_WIDTH, 1, false); //haling 1 - это выравнивание строки по центру
         batch.end();
         stage.draw();
@@ -77,7 +82,7 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void dispose() {
-
+        background.dispose();
     }
 }
 

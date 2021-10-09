@@ -1,5 +1,6 @@
 package ru.gb.pugacheva.stargame.game;
 
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import ru.gb.pugacheva.stargame.game.helpers.Poolable;
@@ -22,6 +23,7 @@ public class PowerUp implements Poolable {
     private boolean active;
     private Type type;
     private int power;
+    private Circle takeArea;
 
     public Type getType() {
         return type;
@@ -52,11 +54,20 @@ public class PowerUp implements Poolable {
         active = false;
     }
 
+    public Circle getTakeArea() {
+        return takeArea;
+    }
+
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
+    }
+
     public PowerUp(GameController gc) {
         this.gc = gc;
         this.position = new Vector2(0, 0);
         this.velocity = new Vector2(0, 0);
         this.active = false;
+        this.takeArea = new Circle(position, 48);
     }
 
     public void activate(Type type, float x, float y, int power) {

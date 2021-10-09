@@ -130,10 +130,14 @@ public class GameController {
 
         for (int i = 0; i < powerUpsController.getActiveList().size(); i++) {
             PowerUp p = powerUpsController.getActiveList().get(i);
+            if(hero.getHitarea().overlaps(p.getTakeArea())){
+                Vector2 newPowerUpVector = hero.getVelocity().sub(p.getVelocity()).nor().scl(300.0f);
+                p.setVelocity(newPowerUpVector);
+            }
+
             if (hero.getHitarea().contains(p.getPosition())) {
                 hero.consume(p);
                 particleController.getEffectBuilder().takePowerUpEffect(p.getPosition().x, p.getPosition().y, p.getType());
-
                 p.deactivate();
             }
         }

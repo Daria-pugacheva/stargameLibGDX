@@ -95,14 +95,14 @@ public class Hero {
         this.velocity = new Vector2(0, 0); // вектор скорости изначально нулевой - не двигаемся
         this.angel = 0.0f;
         this.enginePower = 500.0f;
-        this.hpMax = 100;
+        this.hpMax = 1000;
         this.hp = hpMax;
         this.money = 1000;
         this.shop = new Shop(this);
         this.stringBuilder = new StringBuilder();
         this.hitarea = new Circle(position, 26); // радиус чуть меньше, чем у героя, чтобы урон был только про попадании по видимой части корабля, а не по пустым пикселям
         createWeapons();
-        this.weaponNum = 0;
+        this.weaponNum = 4;
         this.currentWeapon = weapons [weaponNum];
     }
 

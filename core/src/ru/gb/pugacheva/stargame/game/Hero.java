@@ -16,7 +16,7 @@ import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class Hero {
     public enum Skill {
-        HP_MAX(20), HP(20), WEAPON(100);
+        HP_MAX(20), HP(20), WEAPON(100), MAGNET (50);
 
         int cost;
 
@@ -39,10 +39,15 @@ public class Hero {
     private int money;
     private StringBuilder stringBuilder;
     private Circle hitarea;
+    private Circle magneticField;
     private Weapon currentWeapon;
     private Shop shop;
     private Weapon[] weapons;
     private int weaponNum;
+
+    public Circle getMagneticField() {
+        return magneticField;
+    }
 
     public Shop getShop() {
         return shop;
@@ -95,14 +100,15 @@ public class Hero {
         this.velocity = new Vector2(0, 0); // вектор скорости изначально нулевой - не двигаемся
         this.angel = 0.0f;
         this.enginePower = 500.0f;
-        this.hpMax = 100;
+        this.hpMax = 1000;
         this.hp = hpMax;
         this.money = 1000;
         this.shop = new Shop(this);
         this.stringBuilder = new StringBuilder();
         this.hitarea = new Circle(position, 26); // радиус чуть меньше, чем у героя, чтобы урон был только про попадании по видимой части корабля, а не по пустым пикселям
+        this.magneticField = new Circle(position,100);
         createWeapons();
-        this.weaponNum = 0;
+        this.weaponNum = 4;
         this.currentWeapon = weapons [weaponNum];
     }
 
@@ -131,6 +137,9 @@ public class Hero {
         switch (p.getType()) {
             case MEDKIT:
                 hp += p.getPower();
+                if(hp > hpMax){
+                    hp = hpMax;
+                }
                 break;
             case MONEY:
                 money += p.getPower();
@@ -147,14 +156,22 @@ public class Hero {
                 hpMax += 10;
                 return true;
             case HP:
-                hp += 10;
-                return true;
+                if(hp < hpMax){
+                    hp += 10;
+                    if(hp > hpMax){
+                        hp = hpMax;
+                    }
+                    return true;
+                }
             case WEAPON:
                 if(weaponNum <weapons.length -1){
                     weaponNum ++;
                     currentWeapon = weapons[weaponNum];
                     return true;
                 }
+            case MAGNET:
+                magneticField.radius += 10;
+                return true;
         }
         return false;
     }
@@ -188,6 +205,7 @@ public class Hero {
 
         position.mulAdd(velocity, dt); // Добавляя вектор скорости к позиции, получаем движение
         hitarea.setPosition(position); // с изменением позици меняется и позиция зоны урона
+        magneticField.setPosition(position);
         float stopKoef = 1.0f - 1.0f * dt;
         if (stopKoef < 0) {
             stopKoef = 0;

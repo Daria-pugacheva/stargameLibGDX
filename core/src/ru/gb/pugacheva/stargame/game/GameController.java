@@ -82,13 +82,13 @@ public class GameController {
         for (int i = 0; i < asteroidController.getActiveList().size(); i++) {
             Asteroid a = asteroidController.getActiveList().get(i);
             if (a.getHitArea().overlaps(hero.getHitarea())) {
-                float distance = a.getPosition().dst(hero.getPosition()); //расстояение между центрами астероида и корабля
-                float halfOverlen = ((a.getHitArea().radius + hero.getHitarea().radius) - distance) / 2;
+                float dst = a.getPosition().dst(hero.getPosition());
+                float halfOverLen = (a.getHitArea().radius + hero.getHitarea().radius - dst) / 2.0f;
                 tempVector.set(hero.getPosition()).sub(a.getPosition()).nor();
-                hero.getPosition().mulAdd(tempVector, halfOverlen);
-                a.getPosition().mulAdd(tempVector, -halfOverlen);
+                hero.getPosition().mulAdd(tempVector, halfOverLen);
+                a.getPosition().mulAdd(tempVector, -halfOverLen);
 
-                float sumScl = hero.getHitarea().radius * 2 + a.getHitArea().radius; // общая "сила" столкновения
+                float sumScl = hero.getHitarea().radius * 2 + a.getHitArea().radius;
 
                 hero.getVelocity().mulAdd(tempVector, 200.0f * a.getHitArea().radius / sumScl);
                 a.getVelocity().mulAdd(tempVector, -200.0f * hero.getHitarea().radius / sumScl);
@@ -96,26 +96,28 @@ public class GameController {
                 if (a.takeDamage(2)) {
                     hero.addScore(a.getHpMax() * 20);
                 }
-                hero.takeDamage(2);
+                hero.takeDamage(5); //hero.takeDamage(level * 2);
             }
-
         }
+
 
         for (int i = 0; i < bulletController.getActiveList().size(); i++) {
             Bullet b = bulletController.getActiveList().get(i);
             for (int j = 0; j < asteroidController.getActiveList().size(); j++) {
                 Asteroid a = asteroidController.getActiveList().get(j);
                 if (a.getHitArea().contains(b.getPosition())) {
+
                     particleController.setup(
                             b.getPosition().x + MathUtils.random(-4, 4),
                             b.getPosition().y + MathUtils.random(-4, 4),
                             b.getVelocity().x * -0.3f + MathUtils.random(-30, 30),
                             b.getVelocity().y * -0.3f + MathUtils.random(-30, 30),
                             0.2f,
-                            2.5f, 1.7f,
+                            2.3f, 1.7f,
                             1.0f, 1.0f, 1.0f, 1.0f,
                             0.0f, 0.0f, 1.0f, 0.0f
                     );
+
                     b.deactivate();
                     if (a.takeDamage(1)) {
                         hero.addScore(a.getHpMax() * 100);
@@ -130,14 +132,22 @@ public class GameController {
 
         for (int i = 0; i < powerUpsController.getActiveList().size(); i++) {
             PowerUp p = powerUpsController.getActiveList().get(i);
+            if (hero.getMagneticField().contains(p.getPosition())) {
+                tempVector.set(hero.getPosition()).sub(p.getPosition()).nor();
+                p.getVelocity().mulAdd(tempVector, 200.0f);
+            }
+
             if (hero.getHitarea().contains(p.getPosition())) {
                 hero.consume(p);
-                particleController.getEffectBuilder().takePowerUpEffect(p.getPosition().x, p.getPosition().y, p.getType());
-
+                particleController.getEffectBuilder().takePowerUpEffect(
+                        p.getPosition().x, p.getPosition().y, p.getType());
                 p.deactivate();
             }
         }
     }
+
+
+
 
     public void dispose(){
         background.dispose();

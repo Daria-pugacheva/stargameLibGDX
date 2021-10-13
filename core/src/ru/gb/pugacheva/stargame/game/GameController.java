@@ -15,6 +15,7 @@ public class GameController {
     private AsteroidController asteroidController;
     private ParticleController particleController;
     private PowerUpsController powerUpsController;
+    private BotController botController;
     private Hero hero;
     private Vector2 tempVector;
     private Stage stage;
@@ -22,6 +23,10 @@ public class GameController {
     private int level;
     private float roundTimer;
     private Music music;
+
+    public BotController getBotController() {
+        return botController;
+    }
 
     public float getRoundTimer() {
         return roundTimer;
@@ -70,6 +75,7 @@ public class GameController {
         this.particleController = new ParticleController();
         this.asteroidController = new AsteroidController(this);
         this.powerUpsController = new PowerUpsController(this);
+        this.botController = new BotController(this);
         this.stage = new Stage(ScreenManager.getInstance().getViewport(),batch);
         this.stage.addActor(hero.getShop());
         Gdx.input.setInputProcessor(stage);
@@ -80,8 +86,6 @@ public class GameController {
         this.music.setLooping(true);
         this.music.play();
         generateBigAsteroids(1);
-
-
     }
 
     private void generateBigAsteroids (int count){
@@ -103,6 +107,10 @@ public class GameController {
         bulletController.update(dt);
         powerUpsController.update(dt);
         particleController.update(dt);
+        if(hero.getHpMax()>120 && !botController.isSingleBotActive()){
+            botController.setup();
+        }
+        botController.update(dt, hero);
         checkCollisions();
         if(!hero.isAlive()){
             ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER, hero);
@@ -180,10 +188,13 @@ public class GameController {
                         p.getPosition().x, p.getPosition().y, p.getType());
                 p.deactivate();
             }
+
+            if(botController.getCurrentBot().getHitArea().contains(p.getPosition())){
+                p.deactivate();
+            }
+
         }
     }
-
-
 
 
     public void dispose(){

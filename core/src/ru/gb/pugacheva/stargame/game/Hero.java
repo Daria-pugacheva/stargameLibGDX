@@ -45,6 +45,9 @@ public class Hero {
     private Weapon[] weapons;
     private int weaponNum;
 
+    public int getHpMax() {
+        return hpMax;
+    }
 
     public Circle getMagneticField() {
         return magneticField;
@@ -105,15 +108,15 @@ public class Hero {
         this.velocity = new Vector2(0, 0); // вектор скорости изначально нулевой - не двигаемся
         this.angel = 0.0f;
         this.enginePower = 500.0f;
-        this.hpMax = 1000;
+        this.hpMax = 100;
         this.hp = hpMax;
-        this.money = 1000;
+        this.money = 100;
         this.shop = new Shop(this);
         this.stringBuilder = new StringBuilder();
         this.hitarea = new Circle(position, 26); // радиус чуть меньше, чем у героя, чтобы урон был только про попадании по видимой части корабля, а не по пустым пикселям
         this.magneticField = new Circle(position,100);
         createWeapons();
-        this.weaponNum = 4;
+        this.weaponNum = 4; // TODO: для тестирования играю с самым большим оружием. ИСПРАВИТЬ
         this.currentWeapon = weapons [weaponNum];
     }
 

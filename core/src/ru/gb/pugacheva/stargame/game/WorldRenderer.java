@@ -46,8 +46,6 @@ public class WorldRenderer {
     public void render() {
         frameBuffer.begin();
 
-
-
         ScreenUtils.clear(0, 0.2f, 0.5f, 1);
         batch.begin();
         gc.getBackground().render(batch);
@@ -56,6 +54,7 @@ public class WorldRenderer {
         gc.getBulletController().render(batch);
         gc.getPowerUpsController().render(batch);
         gc.getParticleController().render(batch);
+        gc.getBotController().render(batch);
         batch.end();
         frameBuffer.end();
 

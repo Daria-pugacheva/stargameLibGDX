@@ -1,11 +1,13 @@
 package ru.gb.pugacheva.stargame.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import ru.gb.pugacheva.stargame.screen.ScreenManager;
+import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class GameController {
     private Background background;
@@ -16,6 +18,22 @@ public class GameController {
     private Hero hero;
     private Vector2 tempVector;
     private Stage stage;
+    private boolean pause;
+    private int level;
+    private float roundTimer;
+    private Music music;
+
+    public float getRoundTimer() {
+        return roundTimer;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setPause(boolean pause) {
+        this.pause = pause;
+    }
 
     public Stage getStage() {
         return stage;
@@ -56,15 +74,29 @@ public class GameController {
         this.stage.addActor(hero.getShop());
         Gdx.input.setInputProcessor(stage);
         this.tempVector = new Vector2(0.0f, 0.0f);
-        for (int i = 0; i < 3; i++) {
+        this.level =1;
+        this.roundTimer = 0.0f;
+        this.music = Assets.getInstance().getAssetManager().get("audio/mortal.mp3");
+        this.music.setLooping(true);
+        this.music.play();
+        generateBigAsteroids(1);
+
+
+    }
+
+    private void generateBigAsteroids (int count){
+        for (int i = 0; i < count; i++) {
             asteroidController.setup(MathUtils.random(0, ScreenManager.SCREEN_WIDTH),
                     MathUtils.random(0, ScreenManager.SCREEN_HEIGHT),
                     MathUtils.random(-200, 200), MathUtils.random(-200, 200), 1.0f);
         }
-
     }
 
     public void update(float dt) {
+        if(pause){
+            return;
+        }
+        roundTimer += dt;
         background.update(dt);
         hero.update(dt);
         asteroidController.update(dt);
@@ -74,6 +106,11 @@ public class GameController {
         checkCollisions();
         if(!hero.isAlive()){
             ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER, hero);
+        }
+        if(asteroidController.getActiveList().size() ==0){
+            level++;
+            generateBigAsteroids(level <= 3 ? level: 3); //до 3-го уровня кол-во астероидов на старте равно уровню, потом все время по три астероида генерим
+            roundTimer = 0.0f;
         }
         stage.act(dt);
     }
@@ -96,7 +133,7 @@ public class GameController {
                 if (a.takeDamage(2)) {
                     hero.addScore(a.getHpMax() * 20);
                 }
-                hero.takeDamage(5); //hero.takeDamage(level * 2);
+                hero.takeDamage(level * 2);
             }
         }
 

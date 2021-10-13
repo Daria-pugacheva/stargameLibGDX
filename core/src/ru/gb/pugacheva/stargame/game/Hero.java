@@ -45,6 +45,7 @@ public class Hero {
     private Weapon[] weapons;
     private int weaponNum;
 
+
     public Circle getMagneticField() {
         return magneticField;
     }
@@ -93,6 +94,10 @@ public class Hero {
         money -= amount;
     }
 
+    public void setPause(boolean pause){
+        gc.setPause(pause);
+    }
+
     public Hero(GameController gc) {
         this.gc = gc;
         this.texture = Assets.getInstance().getAtlas().findRegion("ship");
@@ -126,6 +131,7 @@ public class Hero {
         stringBuilder.append("MONEY: ").append(money).append("\n");
         stringBuilder.append("BULLETS: ").append(currentWeapon.getCurrentBulletQuantity()).append("/")
                 .append(currentWeapon.getMaxBulletQuantity()).append("\n");
+        stringBuilder.append("MAGNETIC: ").append((int)magneticField.radius).append("\n");
         font.draw(batch, stringBuilder, 20, ScreenManager.SCREEN_HEIGHT - 20);
     }
 
@@ -200,6 +206,7 @@ public class Hero {
             velocity.y += MathUtils.sinDeg(angel - 180) * enginePower / 2 * dt;
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+            setPause(true);
             shop.setVisible(true);
         }
 

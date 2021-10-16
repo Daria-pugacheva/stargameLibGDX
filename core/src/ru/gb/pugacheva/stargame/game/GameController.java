@@ -2,6 +2,7 @@ package ru.gb.pugacheva.stargame.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -26,7 +27,14 @@ public class GameController {
     private int level;
     private float roundTimer;
     private Music music;
+    private Sound explosionSound;
     private StringBuilder stringBuilder;
+    private int botQuantity;
+    private float pauseWithoutBot;
+
+    public int getBotQuantity() {
+        return botQuantity;
+    }
 
     public Bot getBot() {
         return bot;
@@ -79,7 +87,9 @@ public class GameController {
     public GameController(SpriteBatch batch) {
         this.background = new Background(this);
         this.hero = new Hero(this);
-        this.bot = new Bot(this);
+//        this.bot = new Bot(this);
+        this.botQuantity = 0;
+        this.pauseWithoutBot=0;
         this.bulletController = new BulletController(this);
         this.particleController = new ParticleController();
         this.asteroidController = new AsteroidController(this);
@@ -95,9 +105,8 @@ public class GameController {
         this.music = Assets.getInstance().getAssetManager().get("audio/mortal.mp3");
         this.music.setLooping(true);
         this.music.play();
+        this.explosionSound = Assets.getInstance().getAssetManager().get("audio/explosion.mp3");
         generateBigAsteroids(1);
-
-
     }
 
     private void generateBigAsteroids(int count) {
@@ -112,10 +121,18 @@ public class GameController {
         if (pause) {
             return;
         }
+        pauseWithoutBot+=dt;
         roundTimer += dt;
         background.update(dt);
         hero.update(dt);
-        if (bot.isAlive()) {
+        if (hero.getHpMax() > 120 && botQuantity == 0 && pauseWithoutBot > 15.0f) {
+            this.bot = new Bot(this);
+            botQuantity = 1;
+        }
+//        if (bot.isAlive()) {
+//            bot.update(dt);
+//        }
+        if (botQuantity == 1) {
             bot.update(dt);
         }
         asteroidController.update(dt);
@@ -136,6 +153,23 @@ public class GameController {
     }
 
     public void checkCollisions() {
+        checkAsteroidHeroCollisions();
+
+        if (botQuantity == 1) {
+            checkAsteroidBotCollisions();
+            checkCrossDamageFromBulletsOfBotAndHero();
+        }
+        checkAsteroidBulletCollisions();
+
+//        if(botQuantity>0){
+//          checkCrossDamageFromBulletsOfBotAndHero();
+//        }
+        checkHeroPowerUpsCollisions();
+
+
+    }
+
+    private void checkAsteroidHeroCollisions() {
         for (int i = 0; i < asteroidController.getActiveList().size(); i++) {
             Asteroid a = asteroidController.getActiveList().get(i);
             if (a.getHitArea().overlaps(hero.getHitArea())) {
@@ -161,7 +195,9 @@ public class GameController {
                 }
             }
         }
+    }
 
+    private void checkAsteroidBotCollisions() {
         for (int i = 0; i < asteroidController.getActiveList().size(); i++) {
             Asteroid a = asteroidController.getActiveList().get(i);
             if (a.getHitArea().overlaps(bot.getHitArea())) {
@@ -180,16 +216,16 @@ public class GameController {
 
             }
         }
+    }
 
-
+    private void checkAsteroidBulletCollisions() {
         for (int i = 0; i < bulletController.getActiveList().size(); i++) {
             Bullet b = bulletController.getActiveList().get(i);
             for (int j = 0; j < asteroidController.getActiveList().size(); j++) {
                 Asteroid a = asteroidController.getActiveList().get(j);
                 if (a.getHitArea().contains(b.getPosition())) {
-
                     particleController.getEffectBuilder()
-                            .bulletCollideWithAsteroid(b.getPosition(),b.getVelocity());
+                            .bulletCollideWithAsteroid(b.getPosition(), b.getVelocity());
 
                     b.deactivate();
                     int damage = hero.getCurrentWeapon().getDamage();
@@ -200,7 +236,7 @@ public class GameController {
                         infoController.setup(a.getPosition().x, a.getPosition().y, stringBuilder.toString(), Color.WHITE);
                     }
                     if (a.takeDamage(damage)) {
-                        if(b.getOwner().getOwnerType() == OwnerType.PLAYER){
+                        if (b.getOwner().getOwnerType() == OwnerType.PLAYER) {
                             hero.addScore(a.getHpMax() * 100);
                             for (int k = 0; k < 3; k++) {
                                 powerUpsController.setup(a.getPosition().x, a.getPosition().y, a.getScale() / 4.0f);
@@ -211,25 +247,34 @@ public class GameController {
                 }
             }
         }
+    }
 
+    private void checkCrossDamageFromBulletsOfBotAndHero() {
         for (int i = 0; i < bulletController.getActiveList().size(); i++) {
             Bullet b = bulletController.getActiveList().get(i);
-            if(b.getOwner().getOwnerType() == OwnerType.PLAYER && bot.isAlive()){
-                if(bot.getHitArea().contains(b.getPosition())){
+            if (b.getOwner().getOwnerType() == OwnerType.PLAYER && bot.isAlive()) {
+                if (bot.getHitArea().contains(b.getPosition())) {
                     bot.takeDamage(hero.currentWeapon.getDamage());
+                    if (!bot.isAlive()) {
+                        particleController.getEffectBuilder().killBotEffect(bot.getPosition().x, b.getPosition().y);
+                        explosionSound.play();
+                        botQuantity=0;
+                        pauseWithoutBot=0;
+                    }
                     b.deactivate();
                 }
             }
 
-            if(b.getOwner().getOwnerType() == OwnerType.BOT){
-                if(hero.getHitArea().contains(b.getPosition())){
+            if (b.getOwner().getOwnerType() == OwnerType.BOT) {
+                if (hero.getHitArea().contains(b.getPosition())) {
                     hero.takeDamage(bot.currentWeapon.getDamage());
                     b.deactivate();
                 }
             }
         }
+    }
 
-
+    private void checkHeroPowerUpsCollisions() {
         for (int i = 0; i < powerUpsController.getActiveList().size(); i++) {
             PowerUp p = powerUpsController.getActiveList().get(i);
             if (hero.getMagneticField().contains(p.getPosition())) {

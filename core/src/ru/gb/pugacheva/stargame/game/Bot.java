@@ -60,7 +60,7 @@ public class Bot extends Ship {
     private void createWeapons() {
         weapons = new Weapon[]{
                 new Weapon(
-                        gc, this, "GreenLaser", 0.3f, 1, 600, 30000,
+                        gc, this, Weapon.WeaponType.GREENLASER, 0.3f, 1, 600, 30000,
                         new Vector3[]{
                                 new Vector3(28, 90, 0),
                                 new Vector3(28, -90, 0)

@@ -6,9 +6,14 @@ import com.badlogic.gdx.math.Vector3;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class Weapon {
+    public enum WeaponType{
+        LASER, GREENLASER;
+    }
+
     private GameController gc;
     private Ship ship;
-    private String title;
+    private WeaponType weaponType;
+   // private String title;
     private float firePeriod;
     private int damage; //урон, который наносит это оружие противнику
     private float bulletSpeed;
@@ -19,8 +24,13 @@ public class Weapon {
     //Z - это напраление стрельбы из точки (указывается угол)
     private Sound shootSound;
 
-    public String getTitle() {
-        return title;
+//    public String getTitle() {
+//        return title;
+//    }
+
+
+    public WeaponType getWeaponType() {
+        return weaponType;
     }
 
     public int getDamage() {
@@ -39,12 +49,12 @@ public class Weapon {
         return maxBulletQuantity;
     }
 
-    public Weapon(GameController gc, Ship ship, String title,
+    public Weapon(GameController gc, Ship ship, WeaponType weaponType,
                   float firePeriod, int damage, float bulletSpeed,
                   int maxBulletQuantity, Vector3[] slots) {
         this.gc = gc;
         this.ship = ship;
-        this.title = title;
+        this.weaponType = weaponType;
         this.firePeriod = firePeriod;
         this.damage = damage;
         this.bulletSpeed = bulletSpeed;

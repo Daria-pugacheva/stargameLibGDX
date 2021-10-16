@@ -125,6 +125,25 @@ public class Shop extends Group {
         btnClose.setPosition(220, 220);
         this.addActor(btnClose);
 
+        final TextButton btnCritical = new TextButton("Crit", textButtonStyle);
+
+        btnCritical.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (hero.isMoneyEnough(Hero.Skill.CRIT.cost)) {
+                    if (hero.upgrade(Hero.Skill.CRIT)) {
+                        hero.decreaseMoney(Hero.Skill.CRIT.cost);
+                    }
+                }
+            }
+        });
+
+        btnCritical.setTransform(true);
+        btnCritical.setScale(0.7f);
+        btnCritical.setPosition(100, 160);
+        this.addActor(btnCritical);
+
+
         this.setPosition(20, 20);
         this.setVisible(false);
         skin.dispose();

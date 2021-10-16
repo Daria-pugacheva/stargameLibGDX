@@ -50,8 +50,18 @@ public class ParticleController extends ObjectPool<Particle> {
            }
         }
 
-        public void createBulletTrace(String weaponTitle, Vector2 bulletPos, Vector2 bulletVel){
-            if(weaponTitle.equals("Laser")){
+        public void killBotEffect(float x, float y) {
+            for (int i = 0; i < 32; i++) {
+                float angle = 6.28f /32.0f * i;
+                setup(x, y, (float) Math.cos(angle) * 100, (float) Math.sin(angle) * 100,
+                        0.8f, 3.0f, 2.8f,
+                        1, 1, 1, 1,
+                        1, 1, 1, 0.5f);
+            }
+        }
+
+        public void createBulletTrace(Weapon.WeaponType weaponType, Vector2 bulletPos, Vector2 bulletVel){
+            if(weaponType.equals(Weapon.WeaponType.LASER)){
                 setup(
                         bulletPos.x + MathUtils.random(-4, 4), bulletPos.y + MathUtils.random(-4, 4),
                         bulletVel.x * -0.3f + MathUtils.random(-20, 20), bulletVel.y * -0.3f + MathUtils.random(-20, 20),
@@ -62,7 +72,7 @@ public class ParticleController extends ObjectPool<Particle> {
                 );
             }
 
-            if(weaponTitle.equals("GreenLaser")){
+            if(weaponType.equals(Weapon.WeaponType.GREENLASER)){
                 setup(
                         bulletPos.x + MathUtils.random(-4, 4), bulletPos.y + MathUtils.random(-4, 4),
                         bulletVel.x * -0.3f + MathUtils.random(-20, 20), bulletVel.y * -0.3f + MathUtils.random(-20, 20),

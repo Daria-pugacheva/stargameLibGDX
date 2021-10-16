@@ -17,7 +17,7 @@ import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class Hero extends Ship {
     public enum Skill {
-        HP_MAX(20), HP(20), WEAPON(100), MAGNET(50);
+        HP_MAX(20), HP(20), WEAPON(100), MAGNET(50), CRIT(50);
 
         int cost;
 
@@ -87,6 +87,7 @@ public class Hero extends Ship {
         stringBuilder.append("BULLETS: ").append(currentWeapon.getCurrentBulletQuantity()).append("/")
                 .append(currentWeapon.getMaxBulletQuantity()).append("\n");
         stringBuilder.append("MAGNETIC: ").append((int) magneticField.radius).append("\n");
+        stringBuilder.append("CRIT CHANCE: ").append(critical).append("\n");
         font.draw(batch, stringBuilder, 20, ScreenManager.SCREEN_HEIGHT - 20);
     }
 
@@ -139,6 +140,14 @@ public class Hero extends Ship {
             case MAGNET:
                 magneticField.radius += 10;
                 return true;
+            case CRIT:
+                if (critical < 100) {
+                    critical += 5;
+                    if (critical > 100) {
+                        critical = 100;
+                    }
+                    return true;
+                }
         }
         return false;
     }
@@ -199,20 +208,20 @@ public class Hero extends Ship {
     private void createWeapons() {
         weapons = new Weapon[]{
                 new Weapon(
-                        gc, this, "Laser", 0.2f, 1, 600, 300,
+                        gc, this, Weapon.WeaponType.LASER, 0.2f, 1, 600, 300,
                         new Vector3[]{
                                 new Vector3(28, 90, 0),
                                 new Vector3(28, -90, 0)
                         }),
                 new Weapon(
-                        gc, this, "Laser", 0.2f, 1, 600, 300,
+                        gc, this, Weapon.WeaponType.LASER, 0.2f, 1, 600, 300,
                         new Vector3[]{
                                 new Vector3(28, 0, 0),
                                 new Vector3(28, 90, 20),
                                 new Vector3(28, -90, -20)
                         }),
                 new Weapon(
-                        gc, this, "Laser", 0.2f, 1, 600, 500,
+                        gc, this, Weapon.WeaponType.LASER, 0.2f, 1, 600, 500,
                         new Vector3[]{
                                 new Vector3(28, 0, 0),
                                 new Vector3(28, 90, 10),
@@ -221,14 +230,14 @@ public class Hero extends Ship {
                                 new Vector3(28, -90, -20)
                         }),
                 new Weapon(
-                        gc, this, "Laser", 0.2f, 1, 600, 300,
+                        gc, this, Weapon.WeaponType.LASER, 0.2f, 1, 600, 300,
                         new Vector3[]{
                                 new Vector3(28, 0, 0),
                                 new Vector3(28, 90, 20),
                                 new Vector3(28, -90, -20)
                         }),
                 new Weapon(
-                        gc, this, "Laser", 0.1f, 2, 600, 1000,
+                        gc, this, Weapon.WeaponType.LASER, 0.1f, 2, 600, 1000,
                         new Vector3[]{
                                 new Vector3(28, 0, 0),
                                 new Vector3(28, 90, 20),

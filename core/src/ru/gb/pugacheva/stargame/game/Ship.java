@@ -24,6 +24,10 @@ public class Ship {
     protected int weaponNum;
     protected OwnerType ownerType;
 
+    public int getHpMax() {
+        return hpMax;
+    }
+
     public OwnerType getOwnerType() {
         return ownerType;
     }

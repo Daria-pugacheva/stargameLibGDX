@@ -2,6 +2,7 @@ package ru.gb.pugacheva.stargame.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -14,9 +15,9 @@ import com.badlogic.gdx.utils.StringBuilder;
 import ru.gb.pugacheva.stargame.screen.ScreenManager;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
-public class Hero {
+public class Hero extends Ship {
     public enum Skill {
-        HP_MAX(20), HP(20), WEAPON(100), MAGNET (50);
+        HP_MAX(20), HP(20), WEAPON(100), MAGNET(50);
 
         int cost;
 
@@ -25,41 +26,19 @@ public class Hero {
         }
     }
 
-    private GameController gc;
-    private TextureRegion texture;
-    private Vector2 position;
-    private Vector2 velocity;
-    private float angel;
-    private float enginePower;
-    private float fireTimer;
     private int score;
     private int scoreView;
-    private int hp;
-    private int hpMax;
     private int money;
     private StringBuilder stringBuilder;
-    private Circle hitarea;
-    private Circle magneticField;
-    private Weapon currentWeapon;
     private Shop shop;
-    private Weapon[] weapons;
-    private int weaponNum;
+    private int critical;
 
-
-    public Circle getMagneticField() {
-        return magneticField;
+    public int getCritical() {
+        return critical;
     }
 
     public Shop getShop() {
         return shop;
-    }
-
-    public Circle getHitarea() {
-        return hitarea;
-    }
-
-    public float getAngel() {
-        return angel;
     }
 
     public int getScore() {
@@ -70,20 +49,8 @@ public class Hero {
         this.score += amount;
     }
 
-    public Vector2 getVelocity() {
-        return velocity;
-    }
-
-    public Vector2 getPosition() {
-        return position;
-    }
-
     public int getMoney() {
         return money;
-    }
-
-    public boolean isAlive() {
-        return hp > 0;
     }
 
     public boolean isMoneyEnough(int amount) {
@@ -94,34 +61,22 @@ public class Hero {
         money -= amount;
     }
 
-    public void setPause(boolean pause){
+    public void setPause(boolean pause) {
         gc.setPause(pause);
     }
 
     public Hero(GameController gc) {
-        this.gc = gc;
+        super(gc, 100, 480, 270);
         this.texture = Assets.getInstance().getAtlas().findRegion("ship");
-        this.position = new Vector2(480, 270);
-        this.velocity = new Vector2(0, 0); // вектор скорости изначально нулевой - не двигаемся
-        this.angel = 0.0f;
         this.enginePower = 500.0f;
-        this.hpMax = 1000;
-        this.hp = hpMax;
-        this.money = 1000;
+        this.money = 100;
+        this.critical = 5;
+        this.ownerType = OwnerType.PLAYER;
         this.shop = new Shop(this);
         this.stringBuilder = new StringBuilder();
-        this.hitarea = new Circle(position, 26); // радиус чуть меньше, чем у героя, чтобы урон был только про попадании по видимой части корабля, а не по пустым пикселям
-        this.magneticField = new Circle(position,100);
         createWeapons();
-        this.weaponNum = 4;
-        this.currentWeapon = weapons [weaponNum];
-    }
-
-
-    public void render(SpriteBatch batch) {
-        batch.draw(texture, position.x - 32, position.y - 32, 32, 32, 64, 64, 1, 1,
-                angel);
-
+        this.weaponNum = 0;
+        this.currentWeapon = weapons[weaponNum];
     }
 
     public void renderGUI(SpriteBatch batch, BitmapFont font) {
@@ -131,27 +86,33 @@ public class Hero {
         stringBuilder.append("MONEY: ").append(money).append("\n");
         stringBuilder.append("BULLETS: ").append(currentWeapon.getCurrentBulletQuantity()).append("/")
                 .append(currentWeapon.getMaxBulletQuantity()).append("\n");
-        stringBuilder.append("MAGNETIC: ").append((int)magneticField.radius).append("\n");
+        stringBuilder.append("MAGNETIC: ").append((int) magneticField.radius).append("\n");
         font.draw(batch, stringBuilder, 20, ScreenManager.SCREEN_HEIGHT - 20);
-    }
-
-    public void takeDamage(int amount) {
-        hp -= amount;
     }
 
     public void consume(PowerUp p) {
         switch (p.getType()) {
             case MEDKIT:
+                int oldHp = hp;
                 hp += p.getPower();
-                if(hp > hpMax){
+                if (hp > hpMax) {
                     hp = hpMax;
                 }
+                stringBuilder.clear();
+                stringBuilder.append("HP +").append(hp - oldHp);
+                gc.getInfoController().setup(p.getPosition().x, p.getPosition().y, stringBuilder.toString(), Color.GREEN);
                 break;
             case MONEY:
+                stringBuilder.clear();
+                stringBuilder.append("MONEY +").append(p.getPower());
+                gc.getInfoController().setup(p.getPosition().x, p.getPosition().y, stringBuilder.toString(), Color.YELLOW);
                 money += p.getPower();
                 break;
             case AMMOS:
-                currentWeapon.addAmmos(p.getPower());
+                int count = currentWeapon.addAmmos(p.getPower());
+                stringBuilder.clear();
+                stringBuilder.append("AMMOS +").append(count);
+                gc.getInfoController().setup(p.getPosition().x, p.getPosition().y, stringBuilder.toString(), Color.ORANGE);
                 break;
         }
     }
@@ -162,16 +123,16 @@ public class Hero {
                 hpMax += 10;
                 return true;
             case HP:
-                if(hp < hpMax){
+                if (hp < hpMax) {
                     hp += 10;
-                    if(hp > hpMax){
+                    if (hp > hpMax) {
                         hp = hpMax;
                     }
                     return true;
                 }
             case WEAPON:
-                if(weaponNum <weapons.length -1){
-                    weaponNum ++;
+                if (weaponNum < weapons.length - 1) {
+                    weaponNum++;
                     currentWeapon = weapons[weaponNum];
                     return true;
                 }
@@ -183,7 +144,7 @@ public class Hero {
     }
 
     public void update(float dt) {
-        fireTimer += dt;
+        super.update(dt);
         updateScore(dt);
 
         if (Gdx.input.isKeyPressed(Input.Keys.P)) {
@@ -191,36 +152,27 @@ public class Hero {
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            angel += 180.0f * dt;
+            rotate(180.0f, dt);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            angel -= 180.0f * dt;
+            rotate(-180.0f, dt);
         }
-
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            velocity.x += MathUtils.cosDeg(angel) * enginePower * dt;
-            velocity.y += MathUtils.sinDeg(angel) * enginePower * dt;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            velocity.x += MathUtils.cosDeg(angel - 180) * enginePower / 2 * dt;
-            velocity.y += MathUtils.sinDeg(angel - 180) * enginePower / 2 * dt;
+            accelerate(dt);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            brake(dt);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
             setPause(true);
             shop.setVisible(true);
         }
 
-        position.mulAdd(velocity, dt); // Добавляя вектор скорости к позиции, получаем движение
-        hitarea.setPosition(position); // с изменением позици меняется и позиция зоны урона
-        magneticField.setPosition(position);
-        float stopKoef = 1.0f - 1.0f * dt;
-        if (stopKoef < 0) {
-            stopKoef = 0;
-        }
-        velocity.scl(stopKoef);
+
         if (velocity.len() > 50.0f) {
-            float bx = position.x + MathUtils.cosDeg(angel + 180) * 20;
-            float by = position.y + MathUtils.sinDeg(angel + 180) * 20;
+            float bx = position.x + MathUtils.cosDeg(angle + 180) * 20;
+            float by = position.y + MathUtils.sinDeg(angle + 180) * 20;
             for (int i = 0; i < 2; i++) {
                 gc.getParticleController().setup(
                         bx + MathUtils.random(-4, 4), by + MathUtils.random(-4, 4),
@@ -232,7 +184,6 @@ public class Hero {
                 );
             }
         }
-        checkSpaceBorders();
     }
 
     private void updateScore(float dt) {
@@ -244,31 +195,6 @@ public class Hero {
         }
     }
 
-    private void checkSpaceBorders() {
-        if (position.x < 32f) {
-            position.x = 32f;
-            velocity.x *= -1; // отскок в обратную сторону
-        }
-        if (position.x > ScreenManager.SCREEN_WIDTH - 32f) {
-            position.x = ScreenManager.SCREEN_WIDTH - 32f;
-            velocity.x *= -1;
-        }
-        if (position.y < 32f) {
-            position.y = 32f;
-            velocity.y *= -1;
-        }
-        if (position.y > ScreenManager.SCREEN_HEIGHT - 32f) {
-            position.y = ScreenManager.SCREEN_HEIGHT - 32f;
-            velocity.y *= -1;
-        }
-    }
-
-    private void tryToFire() {
-        if (fireTimer > 0.2) {
-            fireTimer = 0.0f;
-            currentWeapon.fire();
-        }
-    }
 
     private void createWeapons() {
         weapons = new Weapon[]{

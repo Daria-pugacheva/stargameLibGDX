@@ -2,10 +2,12 @@ package ru.gb.pugacheva.stargame.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.StringBuilder;
 import ru.gb.pugacheva.stargame.screen.ScreenManager;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
@@ -15,13 +17,24 @@ public class GameController {
     private AsteroidController asteroidController;
     private ParticleController particleController;
     private PowerUpsController powerUpsController;
+    private InfoController infoController;
     private Hero hero;
+    private Bot bot;
     private Vector2 tempVector;
     private Stage stage;
     private boolean pause;
     private int level;
     private float roundTimer;
     private Music music;
+    private StringBuilder stringBuilder;
+
+    public Bot getBot() {
+        return bot;
+    }
+
+    public InfoController getInfoController() {
+        return infoController;
+    }
 
     public float getRoundTimer() {
         return roundTimer;
@@ -66,15 +79,18 @@ public class GameController {
     public GameController(SpriteBatch batch) {
         this.background = new Background(this);
         this.hero = new Hero(this);
+        this.bot = new Bot(this);
         this.bulletController = new BulletController(this);
         this.particleController = new ParticleController();
         this.asteroidController = new AsteroidController(this);
         this.powerUpsController = new PowerUpsController(this);
-        this.stage = new Stage(ScreenManager.getInstance().getViewport(),batch);
+        this.infoController = new InfoController();
+        this.stage = new Stage(ScreenManager.getInstance().getViewport(), batch);
         this.stage.addActor(hero.getShop());
         Gdx.input.setInputProcessor(stage);
         this.tempVector = new Vector2(0.0f, 0.0f);
-        this.level =1;
+        this.stringBuilder = new StringBuilder();
+        this.level = 1;
         this.roundTimer = 0.0f;
         this.music = Assets.getInstance().getAssetManager().get("audio/mortal.mp3");
         this.music.setLooping(true);
@@ -84,7 +100,7 @@ public class GameController {
 
     }
 
-    private void generateBigAsteroids (int count){
+    private void generateBigAsteroids(int count) {
         for (int i = 0; i < count; i++) {
             asteroidController.setup(MathUtils.random(0, ScreenManager.SCREEN_WIDTH),
                     MathUtils.random(0, ScreenManager.SCREEN_HEIGHT),
@@ -93,23 +109,27 @@ public class GameController {
     }
 
     public void update(float dt) {
-        if(pause){
+        if (pause) {
             return;
         }
         roundTimer += dt;
         background.update(dt);
         hero.update(dt);
+        if (bot.isAlive()) {
+            bot.update(dt);
+        }
         asteroidController.update(dt);
         bulletController.update(dt);
         powerUpsController.update(dt);
         particleController.update(dt);
+        infoController.update(dt);
         checkCollisions();
-        if(!hero.isAlive()){
+        if (!hero.isAlive()) {
             ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER, hero);
         }
-        if(asteroidController.getActiveList().size() ==0){
+        if (asteroidController.getActiveList().size() == 0) {
             level++;
-            generateBigAsteroids(level <= 3 ? level: 3); //до 3-го уровня кол-во астероидов на старте равно уровню, потом все время по три астероида генерим
+            generateBigAsteroids(level <= 3 ? level : 3); //до 3-го уровня кол-во астероидов на старте равно уровню, потом все время по три астероида генерим
             roundTimer = 0.0f;
         }
         stage.act(dt);
@@ -118,22 +138,46 @@ public class GameController {
     public void checkCollisions() {
         for (int i = 0; i < asteroidController.getActiveList().size(); i++) {
             Asteroid a = asteroidController.getActiveList().get(i);
-            if (a.getHitArea().overlaps(hero.getHitarea())) {
+            if (a.getHitArea().overlaps(hero.getHitArea())) {
                 float dst = a.getPosition().dst(hero.getPosition());
-                float halfOverLen = (a.getHitArea().radius + hero.getHitarea().radius - dst) / 2.0f;
+                float halfOverLen = (a.getHitArea().radius + hero.getHitArea().radius - dst) / 2.0f;
                 tempVector.set(hero.getPosition()).sub(a.getPosition()).nor();
                 hero.getPosition().mulAdd(tempVector, halfOverLen);
                 a.getPosition().mulAdd(tempVector, -halfOverLen);
 
-                float sumScl = hero.getHitarea().radius * 2 + a.getHitArea().radius;
+                float sumScl = hero.getHitArea().radius * 2 + a.getHitArea().radius;
 
                 hero.getVelocity().mulAdd(tempVector, 200.0f * a.getHitArea().radius / sumScl);
-                a.getVelocity().mulAdd(tempVector, -200.0f * hero.getHitarea().radius / sumScl);
+                a.getVelocity().mulAdd(tempVector, -200.0f * hero.getHitArea().radius / sumScl);
+
+                hero.takeDamage(level * 2);
+                stringBuilder.clear();
+                stringBuilder.append("HP -").append(level * 2);
+                infoController.setup(hero.getPosition().x, hero.getPosition().y, stringBuilder.toString(), Color.RED);
 
                 if (a.takeDamage(2)) {
                     hero.addScore(a.getHpMax() * 20);
+                    continue;
                 }
-                hero.takeDamage(level * 2);
+            }
+        }
+
+        for (int i = 0; i < asteroidController.getActiveList().size(); i++) {
+            Asteroid a = asteroidController.getActiveList().get(i);
+            if (a.getHitArea().overlaps(bot.getHitArea())) {
+                float dst = a.getPosition().dst(bot.getPosition());
+                float halfOverLen = (a.getHitArea().radius + bot.getHitArea().radius - dst) / 2.0f;
+                tempVector.set(bot.getPosition()).sub(a.getPosition()).nor();
+                bot.getPosition().mulAdd(tempVector, halfOverLen);
+                a.getPosition().mulAdd(tempVector, -halfOverLen);
+
+                float sumScl = bot.getHitArea().radius * 2 + a.getHitArea().radius;
+
+                bot.getVelocity().mulAdd(tempVector, 200.0f * a.getHitArea().radius / sumScl);
+                a.getVelocity().mulAdd(tempVector, -200.0f * bot.getHitArea().radius / sumScl);
+
+                a.takeDamage(2);
+
             }
         }
 
@@ -144,28 +188,47 @@ public class GameController {
                 Asteroid a = asteroidController.getActiveList().get(j);
                 if (a.getHitArea().contains(b.getPosition())) {
 
-                    particleController.setup(
-                            b.getPosition().x + MathUtils.random(-4, 4),
-                            b.getPosition().y + MathUtils.random(-4, 4),
-                            b.getVelocity().x * -0.3f + MathUtils.random(-30, 30),
-                            b.getVelocity().y * -0.3f + MathUtils.random(-30, 30),
-                            0.2f,
-                            2.3f, 1.7f,
-                            1.0f, 1.0f, 1.0f, 1.0f,
-                            0.0f, 0.0f, 1.0f, 0.0f
-                    );
+                    particleController.getEffectBuilder()
+                            .bulletCollideWithAsteroid(b.getPosition(),b.getVelocity());
 
                     b.deactivate();
-                    if (a.takeDamage(1)) {
-                        hero.addScore(a.getHpMax() * 100);
-                        for (int k = 0; k < 3; k++) {
-                            powerUpsController.setup(a.getPosition().x, a.getPosition().y, a.getScale() / 4.0f);
+                    int damage = hero.getCurrentWeapon().getDamage();
+                    if (MathUtils.random(0, 100) < hero.getCritical()) {
+                        damage *= 3;
+                        stringBuilder.clear();
+                        stringBuilder.append("-").append(damage);
+                        infoController.setup(a.getPosition().x, a.getPosition().y, stringBuilder.toString(), Color.WHITE);
+                    }
+                    if (a.takeDamage(damage)) {
+                        if(b.getOwner().getOwnerType() == OwnerType.PLAYER){
+                            hero.addScore(a.getHpMax() * 100);
+                            for (int k = 0; k < 3; k++) {
+                                powerUpsController.setup(a.getPosition().x, a.getPosition().y, a.getScale() / 4.0f);
+                            }
                         }
                     }
                     break;
                 }
             }
         }
+
+        for (int i = 0; i < bulletController.getActiveList().size(); i++) {
+            Bullet b = bulletController.getActiveList().get(i);
+            if(b.getOwner().getOwnerType() == OwnerType.PLAYER && bot.isAlive()){
+                if(bot.getHitArea().contains(b.getPosition())){
+                    bot.takeDamage(hero.currentWeapon.getDamage());
+                    b.deactivate();
+                }
+            }
+
+            if(b.getOwner().getOwnerType() == OwnerType.BOT){
+                if(hero.getHitArea().contains(b.getPosition())){
+                    hero.takeDamage(bot.currentWeapon.getDamage());
+                    b.deactivate();
+                }
+            }
+        }
+
 
         for (int i = 0; i < powerUpsController.getActiveList().size(); i++) {
             PowerUp p = powerUpsController.getActiveList().get(i);
@@ -174,7 +237,7 @@ public class GameController {
                 p.getVelocity().mulAdd(tempVector, 200.0f);
             }
 
-            if (hero.getHitarea().contains(p.getPosition())) {
+            if (hero.getHitArea().contains(p.getPosition())) {
                 hero.consume(p);
                 particleController.getEffectBuilder().takePowerUpEffect(
                         p.getPosition().x, p.getPosition().y, p.getType());
@@ -184,9 +247,7 @@ public class GameController {
     }
 
 
-
-
-    public void dispose(){
+    public void dispose() {
         background.dispose();
     }
 }

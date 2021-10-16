@@ -7,7 +7,7 @@ import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
 public class Weapon {
     private GameController gc;
-    private Hero hero;
+    private Ship ship;
     private String title;
     private float firePeriod;
     private int damage; //урон, который наносит это оружие противнику
@@ -19,6 +19,13 @@ public class Weapon {
     //Z - это напраление стрельбы из точки (указывается угол)
     private Sound shootSound;
 
+    public String getTitle() {
+        return title;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
 
     public float getFirePeriod() {
         return firePeriod;
@@ -32,11 +39,11 @@ public class Weapon {
         return maxBulletQuantity;
     }
 
-    public Weapon(GameController gc, Hero hero, String title,
+    public Weapon(GameController gc, Ship ship, String title,
                   float firePeriod, int damage, float bulletSpeed,
                   int maxBulletQuantity, Vector3[] slots) {
         this.gc = gc;
-        this.hero = hero;
+        this.ship = ship;
         this.title = title;
         this.firePeriod = firePeriod;
         this.damage = damage;
@@ -55,22 +62,24 @@ public class Weapon {
             for (int i = 0; i < slots.length; i++) {
                 float x, y, vx, vy;
 
-                x = hero.getPosition().x + MathUtils.cosDeg(hero.getAngel() + slots[i].y) * slots[i].x;
-                y = hero.getPosition().y + MathUtils.sinDeg(hero.getAngel() + slots[i].y) * slots[i].x;
+                x = ship.getPosition().x + MathUtils.cosDeg(ship.getAngle() + slots[i].y) * slots[i].x;
+                y = ship.getPosition().y + MathUtils.sinDeg(ship.getAngle() + slots[i].y) * slots[i].x;
 
-                vx = hero.getVelocity().x + bulletSpeed * MathUtils.cosDeg(hero.getAngel() + slots[i].z);
-                vy = hero.getVelocity().x + bulletSpeed * MathUtils.sinDeg(hero.getAngel() + slots[i].z);
+                vx = ship.getVelocity().x + bulletSpeed * MathUtils.cosDeg(ship.getAngle() + slots[i].z);
+                vy = ship.getVelocity().x + bulletSpeed * MathUtils.sinDeg(ship.getAngle() + slots[i].z);
 
-                gc.getBulletController().setup(x, y, vx, vy);
+                gc.getBulletController().setup(ship, x, y, vx, vy);
 
             }
         }
     }
 
-    public void addAmmos(int amount) {
+    public int addAmmos(int amount) {
+        int old = currentBulletQuantity;
         currentBulletQuantity += amount;
         if (currentBulletQuantity > maxBulletQuantity) {
             currentBulletQuantity = maxBulletQuantity;
         }
+        return currentBulletQuantity - old;
     }
 }

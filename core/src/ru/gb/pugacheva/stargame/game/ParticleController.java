@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import ru.gb.pugacheva.stargame.game.helpers.ObjectPool;
 import ru.gb.pugacheva.stargame.screen.utils.Assets;
 
@@ -47,11 +48,46 @@ public class ParticleController extends ObjectPool<Particle> {
                    }
                    break;
            }
+        }
 
+        public void createBulletTrace(String weaponTitle, Vector2 bulletPos, Vector2 bulletVel){
+            if(weaponTitle.equals("Laser")){
+                setup(
+                        bulletPos.x + MathUtils.random(-4, 4), bulletPos.y + MathUtils.random(-4, 4),
+                        bulletVel.x * -0.3f + MathUtils.random(-20, 20), bulletVel.y * -0.3f + MathUtils.random(-20, 20),
+                        0.05f,
+                        1.5f, 0.2f,
+                        1.0f, 0.3f, 0.0f, 1.0f,
+                        1.0f, 1.0f, 1.0f, 1.0f
+                );
+            }
 
+            if(weaponTitle.equals("GreenLaser")){
+                setup(
+                        bulletPos.x + MathUtils.random(-4, 4), bulletPos.y + MathUtils.random(-4, 4),
+                        bulletVel.x * -0.3f + MathUtils.random(-20, 20), bulletVel.y * -0.3f + MathUtils.random(-20, 20),
+                        0.05f,
+                        1.2f, 2.2f,
+                        0.2f, 1.0f, 0.2f, 1.0f,
+                        0.3f, 1.0f, 0.3f, 1.0f
+                );
+            }
 
         }
 
+
+        public void bulletCollideWithAsteroid(Vector2 bulletPos, Vector2 bulletVel){
+            setup(
+                    bulletPos.x + MathUtils.random(-4, 4),
+                    bulletPos.y + MathUtils.random(-4, 4),
+                    bulletVel.x * -0.3f + MathUtils.random(-30, 30),
+                    bulletVel.y * -0.3f + MathUtils.random(-30, 30),
+                    0.2f,
+                    2.3f, 1.7f,
+                    1.0f, 1.0f, 1.0f, 1.0f,
+                    0.0f, 0.0f, 1.0f, 0.0f
+            );
+        }
     }
 
     private TextureRegion oneParticle;

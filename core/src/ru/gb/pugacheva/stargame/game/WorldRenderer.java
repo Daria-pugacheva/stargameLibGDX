@@ -32,13 +32,13 @@ public class WorldRenderer {
         this.font72 = Assets.getInstance().getAssetManager().get("fonts/font72.ttf", BitmapFont.class);
         this.stringBuilder = new StringBuilder();
 
-        this.frameBuffer = new FrameBuffer(Pixmap.Format.RGB888,ScreenManager.SCREEN_WIDTH, ScreenManager.SCREEN_HEIGHT,
+        this.frameBuffer = new FrameBuffer(Pixmap.Format.RGB888, ScreenManager.SCREEN_WIDTH, ScreenManager.SCREEN_HEIGHT,
                 false);
         this.frameBufferRegion = new TextureRegion(frameBuffer.getColorBufferTexture());
-        this.frameBufferRegion.flip(false,true);
+        this.frameBufferRegion.flip(false, true);
         this.shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl").readString(),
                 Gdx.files.internal("shaders/fragment.glsl").readString());
-        if(!shaderProgram.isCompiled()){
+        if (!shaderProgram.isCompiled()) {
             throw new IllegalArgumentException("Error compiling shader: " + shaderProgram.getLog());
         }
     }
@@ -47,31 +47,34 @@ public class WorldRenderer {
         frameBuffer.begin();
 
 
-
         ScreenUtils.clear(0, 0.2f, 0.5f, 1);
         batch.begin();
         gc.getBackground().render(batch);
         gc.getAsteroidController().render(batch);
         gc.getHero().render(batch);
+        if (gc.getBot().isAlive()) {
+            gc.getBot().render(batch);
+        }
         gc.getBulletController().render(batch);
         gc.getPowerUpsController().render(batch);
         gc.getParticleController().render(batch);
+        gc.getInfoController().render(batch, font32);
         batch.end();
         frameBuffer.end();
 
         batch.begin();
         batch.setShader(shaderProgram);
-        shaderProgram.setUniformf("px",gc.getHero().getPosition().x/ScreenManager.SCREEN_WIDTH);
-        shaderProgram.setUniformf("py",gc.getHero().getPosition().y/ScreenManager.SCREEN_HEIGHT);
-        batch.draw(frameBufferRegion,0,0);
+        shaderProgram.setUniformf("px", gc.getHero().getPosition().x / ScreenManager.SCREEN_WIDTH);
+        shaderProgram.setUniformf("py", gc.getHero().getPosition().y / ScreenManager.SCREEN_HEIGHT);
+        batch.draw(frameBufferRegion, 0, 0);
 
         batch.setShader(null);
         gc.getHero().renderGUI(batch, font32);
-        if(gc.getRoundTimer() <= 3.0f){
+        if (gc.getRoundTimer() <= 3.0f) {
             stringBuilder.clear();
             stringBuilder.append("LEVEL ").append(gc.getLevel());
-            font72.draw(batch,stringBuilder,0, ScreenManager.HALF_SCREEN_HEIGHT,
-                    ScreenManager.SCREEN_WIDTH, Align.center,false);
+            font72.draw(batch, stringBuilder, 0, ScreenManager.HALF_SCREEN_HEIGHT,
+                    ScreenManager.SCREEN_WIDTH, Align.center, false);
         }
 
         batch.end();
